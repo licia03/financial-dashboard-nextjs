@@ -76,7 +76,7 @@ export async function updateInvoice(id: string, prevState: State, formData: Form
     }
   }
 
-  const {amount, customerId, status} = validatedFields.data;
+  const { amount, customerId, status } = validatedFields.data;
 
   const amountInCents = amount * 100;
 
@@ -102,5 +102,26 @@ export async function deleteInvoice(id: string) {
     return { message: 'Deleted invoice' };
   } catch {
     return { message: 'Database error: Failed to Delete invoice' };
+  }
+}
+
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
+
+export async function authenticate(prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Invalid credentials.';
+        default:
+          return 'Something went wrong.';
+      }
+    }
+    throw error;
   }
 }
